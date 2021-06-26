@@ -19,14 +19,16 @@ void callbackActuators(FirebaseStream data){
   log_d("DATA PATH: %s", data.dataPath().c_str());
   log_d("DATA TYPE: %s", data.dataType().c_str());
   log_d("EVENT TYPE: %s",data.eventType().c_str());
+  String absolutePath = (data.streamPath()+data.dataPath());
   if(data.intData() != '\0'){
     act(data);
     if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
 
-      log_v("Zeroing %s...", (data.streamPath()+data.dataPath()).c_str());
-      if(!Firebase.RTDB.setInt(&fbdo, (data.streamPath()+data.dataPath()).c_str(), 0))
-        log_e("REASON: %s", fbdo.errorReason().c_str());
-      
+      if(Firebase.RTDB.setInt(&fbdo, absolutePath.c_str(), 0)){
+        log_v("Zeroing %s...", absolutePath.c_str());
+      } else {
+        log_e("Could not zeroing, REASON: %s", fbdo.errorReason().c_str());
+      }
       log_d("Freeing fbdoMutex from %s", __FUNCTION__);
       xSemaphoreGive(fbdoMutex);
     }else{log_e("Not possible to obtain fbdoMutex");}
