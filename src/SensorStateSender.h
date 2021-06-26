@@ -8,44 +8,48 @@
 template <typename T>
 class SensorStateSender{
 private:
-    const char* path;
+    String path;
     TaskHandle_t sendStatesTask;
     T state;
-    SemaphoreHandle_t postStateMutex;
     static void postStateTask(void *pvParameters){
+        SensorStateSender<T>* stateToPost = reinterpret_cast<SensorStateSender<T>*>(pvParameters);
         if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
         
-        if(Firebase.RTDB.set(&fbdo, stateToPost.path, stateToPost.state)){
-          log_v("State in path %s updated", stateToPost.path);
-        }else{
-          log_e("Could not update state in path %s.\n\tREASON: %s", stateToPost.path, fbdo.errorReason().c_str());
-        }
+            const char* path = stateToPost->path.c_str();
+            if(Firebase.RTDB.set(&fbdo, path, stateToPost->state)){
+                log_d("State in path %s updated", path);
+            }else{
+                log_e("Could not update state in path %s.\n\tREASON: %s", path, fbdo.errorReason().c_str());
+            }
 
             log_d("Freeing fbdoMutex from %s", __FUNCTION__);
-        xSemaphoreGive(fbdoMutex);
-      }else{log_e("Not possible to obtain fbdoMutex");}
+            xSemaphoreGive(fbdoMutex);
+        }else{log_e("Not possible to obtain fbdoMutex");}
       vTaskDelete(NULL);
     };
+    void initPostTask(){
+        if(!path.isEmpty()){
+            xTaskCreatePinnedToCore(postStateTask, "Send state to Firebase", 10000, (void*)this, 1, NULL, 0);
+        }
+    }
 public:
     SensorStateSender(){
-        this->path = "";
-        state = -1;
+        this->path.clear();
+        this->state = T();
     }
-    SensorStateSender(const char* path){
-        this->path = path;
-        state = -1;
+    void initFirebase(const char* path){ //Initialized this way in order to update the last state received
+        this->path = (String(PATH_STATES)+path);
+        initPostTask();
     };
     void deinit(){
-        this->path = "";
+        this->path.clear();
     };
     ~SensorStateSender(){};
     void postState(const T stateToPost){
         if (state != stateToPost){
 
             state = stateToPost;
-            if(strcmp(path,"") != 0){
-                xTaskCreatePinnedToCore(postStateTask, "Send state to Firebase", 10000, (void*) this, 1, &sendStatesTask, 0);
-            }
+            initPostTask();
         }
     };
 };
