@@ -4,7 +4,8 @@
 #ifndef PATH_DEVICE
 #define PATH_DEVICE "/iot_devices/" DEVICE_ID
 #endif
-#define PATH_STATES PATH_DEVICE "/sensors"
+#define PATH_SENSORS PATH_DEVICE "/sensors"
+#define PATH_STATES "/states"
 template <typename T>
 class SensorStateSender{
 private:
@@ -14,12 +15,11 @@ private:
     static void postStateTask(void *pvParameters){
         SensorStateSender<T>* stateToPost = reinterpret_cast<SensorStateSender<T>*>(pvParameters);
         if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
-        
-            const char* path = stateToPost->path.c_str();
-            if(Firebase.RTDB.set(&fbdo, path, stateToPost->state)){
-                log_d("State in path %s updated", path);
+
+            if(Firebase.RTDB.set(&fbdo, (stateToPost->path+PATH_STATES+"/"+String(UTC.now())).c_str(), stateToPost->state)){
+                log_d("State in path %s updated", fbdo.dataPath().c_str());
             }else{
-                log_e("Could not update state in path %s.\n\tREASON: %s", path, fbdo.errorReason().c_str());
+                log_e("Could not update state in path %s.\n\tREASON: %s", fbdo.dataPath().c_str(), fbdo.errorReason().c_str());
             }
 
             log_d("Freeing fbdoMutex from %s", __FUNCTION__);
@@ -38,7 +38,7 @@ public:
         this->state = T();
     }
     void initFirebase(const char* path){ //Initialized this way in order to update the last state received
-        this->path = (String(PATH_STATES)+path);
+        this->path = (String(PATH_SENSORS)+path);
         initPostTask();
     };
     void deinit(){

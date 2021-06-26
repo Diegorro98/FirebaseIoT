@@ -51,6 +51,8 @@ void streamTimeoutCallback(bool timeout){
 }
 
 void FirebaseSetup(){
+  waitForSync();
+  timezone.setLocation(LOCAL_TIME_ZONE);
   log_v("Setting up Firebase...");
     /* Assign the project host and api key (required) */
   fbConfig.host = FIREBASE_HOST;
