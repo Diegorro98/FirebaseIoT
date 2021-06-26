@@ -1,0 +1,16 @@
+{
+  "name": "FirebaseIoT",
+  "version": "1.0.0",
+  "keywords": "IoT, Firebase",
+  "description": "This is a library to create easily devices that can be connected to the Cloud, or, in this case, to Firebase.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Diegorro98/FirebaseIoT"
+  },
+  "authors": [{
+    "name": "J. Diego Rodríguez",
+    "url": "https://github.com/Diegorro98"
+  }],  
+  "frameworks": "arduino",
+  "platforms": "espressif32, espressif8266"
+}

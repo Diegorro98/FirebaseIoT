@@ -1,0 +1,26 @@
+#########################################
+# Classes (KEYWORD1)
+#########################################
+Actuator	KEYWORD1
+SensorStateSender	KEYWORD1
+
+###############################################
+# Methods and Functions (KEYWORD2)
+###############################################
+initActuators	KEYWORD2
+initSensorStateSenders	KEYWORD2
+act	KEYWORD2
+FirebaseSetup	KEYWORD2
+nullSetter	KEYWORD2
+initFirebase	KEYWORD2
+deinit	KEYWORD2
+postState	KEYWORD2
+
+######################################
+# Constants (LITERAL1)
+#######################################
+PATH_ACTUATORS  LITERAL1
+PATH_SENSORS    LITERAL1
+ACTUATOR_H  LITERAL1
+PATH_DEVICE LITERAL1
+PATH_STATES LITERAL1
