@@ -13,8 +13,7 @@ private:
     T state;
     SemaphoreHandle_t postStateMutex;
     static void postStateTask(void *pvParameters){
-        static SensorStateSender<T> stateToPost = *(SensorStateSender<T>*) pvParameters;
-        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){log_d("Taking fbdoMutex from %s to update path %s", __FUNCTION__, stateToPost.path);
+        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
         
         if(Firebase.RTDB.set(&fbdo, stateToPost.path, stateToPost.state)){
           log_v("State in path %s updated", stateToPost.path);
@@ -22,7 +21,7 @@ private:
           log_e("Could not update state in path %s.\n\tREASON: %s", stateToPost.path, fbdo.errorReason().c_str());
         }
 
-        log_d("Freeing fbdoMutex from %s to update path %s", __FUNCTION__, stateToPost.path);
+            log_d("Freeing fbdoMutex from %s", __FUNCTION__);
         xSemaphoreGive(fbdoMutex);
       }else{log_e("Not possible to obtain fbdoMutex");}
       vTaskDelete(NULL);

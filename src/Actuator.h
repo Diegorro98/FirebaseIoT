@@ -15,15 +15,15 @@ public:
     Actuator(String path){
         this->path = path;
         action = T();
-        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){log_d("Taking fbdoMutex from %s to update path %s", __FUNCTION__, path.c_str());
+        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
 
             if(Firebase.RTDB.set(&fbdo, (PATH_ACTUATORS+path).c_str(), action)){
-                log_v(" path \"%s\" setted to default value", path.c_str());
+                log_d(" path \"%s\" setted to default value", path.c_str());
             }else{
                 log_e("Could not update state in path %s.\n\tREASON: %s", path.c_str(), fbdo.errorReason().c_str());
             }
 
-            log_d("Freeing fbdoMutex from %s to update path %s", __FUNCTION__, path.c_str());
+            log_d("Freeing fbdoMutex from %s", __FUNCTION__);
             xSemaphoreGive(fbdoMutex);
         }else{log_e("Not possible to obtain fbdoMutex");}
     };
