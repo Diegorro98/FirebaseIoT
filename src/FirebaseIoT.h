@@ -56,8 +56,6 @@ void FirebaseSetup(){
     fbdoMutex = xSemaphoreCreateMutex();
     delay(1);
   }
-  initActuators();
-  initSensorStateSenders();
   
   Firebase.reconnectWiFi(true);
   Firebase.RTDB.setwriteSizeLimit(&fbdo, "tiny");
@@ -68,5 +66,16 @@ void FirebaseSetup(){
     log_d("Firebase Streaming ready! (Path: %s)", PATH_ACTUATORS);
   }
   Firebase.RTDB.setStreamCallback(&fbdoStream, callbackActuators, streamTimeoutCallback);
+  if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){
+    log_v("Wating for the token to be ready...");
+    for (token_info_t info = Firebase.authTokenInfo(); info.status != token_status_ready; info = Firebase.authTokenInfo()){
+      log_v("AuthToken not ready yet");  
+    }
+    log_i("AuthToken ready!");
+    xSemaphoreGive(fbdoMutex);
+  }
+  
+  initActuators();
+  initSensorStateSenders();
 }
 #endif
