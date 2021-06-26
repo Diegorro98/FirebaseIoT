@@ -9,25 +9,31 @@
 template <typename T>
 class Actuator{
 private:
+    String absolutePath;
 public:
     String path;
     T action;
-    Actuator(String path){
-        this->path = path;
+    Actuator(String pPath): absolutePath{PATH_ACTUATORS+pPath}, path{pPath}{
         action = T();
-        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
-
-            if(Firebase.RTDB.set(&fbdo, (PATH_ACTUATORS+path).c_str(), action)){
+        if(nullSetter()){
                 log_d(" path \"%s\" setted to default value", path.c_str());
             }else{
                 log_e("Could not update state in path %s.\n\tREASON: %s", path.c_str(), fbdo.errorReason().c_str());
             }
 
+    };
+    bool nullSetter(){
+        if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){log_d("Taking fbdoMutex from %s", __FUNCTION__);
+
+            bool ret=Firebase.RTDB.set(&fbdo, absolutePath.c_str(), T());
+
             log_d("Freeing fbdoMutex from %s", __FUNCTION__);
             xSemaphoreGive(fbdoMutex);
+            return ret;
         }else{log_e("Not possible to obtain fbdoMutex");}
-    };
-    Actuator(){};
+        return false;
+    }
+    Actuator() = default;
     ~Actuator(){};
 };
 

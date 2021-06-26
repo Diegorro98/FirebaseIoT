@@ -11,30 +11,47 @@ FirebaseConfig fbConfig;
 void initActuators();
 /** Define this method in order to init the Sensor senders*/
 void initSensorStateSenders();
-/** Define this method in order to define how are the actuators are going to act*/
-void act(FirebaseStream);
+/** 
+ * Define this method in order to define how are the actuators are going to act. 
+ * @param data Gives all the information about the data and the data itself
+ * @return This function should return the Actuator::nullSetter method to notify who did the action that has it been received. 
+ * Handle later or not even handle it return 2. (If handled later, execute it in the not-main-loop-executer core) 
+ * Return UINT8_MAX is for the case that no actuator was found.
+ * @code{c}
+ * uint8_t act(FirebaseStream data){
+ *  if(data.dataPath().compareTo(actuator.path) == 0){
+ *    actuator.action = data.intData(); //if actuator is an instance of Actuator<int>
+ *    //do whatever
+ *    return actuator.nullSetter(); //or 2 if you will handle it later.
+ *  }
+ *  //if there are no coincidences
+ *  return UINT8_MAX;
+ * }
+ * @endcode
+*/
+uint8_t act(FirebaseStream data);
 void callbackActuators(FirebaseStream data){
-  log_i("New value (%d) aviable!", data.intData());
+  //log_i("New value(%s) aviable!", data.rawData().c_str());
+  if(data.dataType().compareTo("int") == 0){
+    log_i("New value(%d) aviable!", data.intData());
+  }else if (data.dataType().compareTo("string") == 0) {
+    log_i("New value(%s) aviable!", data.stringData().c_str());
+  }else if (data.dataType().compareTo("json") == 0){
+    log_i("New value(%s) aviable!", data.jsonString().c_str());
+  }else{
+    log_i("New value aviable!");
+  }
   log_d("STREAM PATH: %s", data.streamPath().c_str());
   log_d("DATA PATH: %s", data.dataPath().c_str());
   log_d("DATA TYPE: %s", data.dataType().c_str());
   log_d("EVENT TYPE: %s",data.eventType().c_str());
-  String absolutePath = (data.streamPath()+data.dataPath());
-  if(data.intData() != '\0'){
-    act(data);
-    if (xSemaphoreTake(fbdoMutex, portMAX_DELAY)){ log_d("fbdoMutex taken from %s", __FUNCTION__);
-
-      if(Firebase.RTDB.setInt(&fbdo, absolutePath.c_str(), 0)){
-        log_v("Zeroing %s...", absolutePath.c_str());
-      } else {
-        log_e("Could not zeroing, REASON: %s", fbdo.errorReason().c_str());
-      }
-      log_d("Freeing fbdoMutex from %s", __FUNCTION__);
-      xSemaphoreGive(fbdoMutex);
-    }else{log_e("Not possible to obtain fbdoMutex");}
-    
-  }else{
-    log_d("0 obtained, discarded");
+  uint8_t result = act(data);
+  if(result == true){
+    log_d("Reseted actuator %s", data.dataPath().c_str());
+  }else if(result == false){
+    log_e("Could not reset actuator %s, %s", data.dataPath().c_str(), fbdo.errorReason().c_str());
+  }else if( result == UINT8_MAX){
+    log_i("No actuator \"%s\" is declared", data.dataPath().c_str());
   }
 }
 void streamTimeoutCallback(bool timeout){
@@ -43,7 +60,7 @@ void streamTimeoutCallback(bool timeout){
 }
 
 void FirebaseSetup(){
-  log_v("Inicializando Firebase...");
+  log_v("Setting up Firebase...");
     /* Assign the project host and api key (required) */
   fbConfig.host = FIREBASE_HOST;
   fbConfig.api_key = API_KEY;
