@@ -2,7 +2,7 @@
 #define SENSORSTATESENDER_H
 #include "FbIot_Utils.h"
 #ifndef PATH_DEVICE
-#define PATH_DEVICE "iot_devices/" DEVICE_ID
+#define PATH_DEVICE "/iot_devices/" DEVICE_ID
 #endif
 #define PATH_STATES PATH_DEVICE "/sensors"
 template <typename T>

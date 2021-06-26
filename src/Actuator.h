@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "FbIot_Utils.h"
 #ifndef PATH_DEVICE
-#define PATH_DEVICE "iot_devices/" DEVICE_ID
+#define PATH_DEVICE "/iot_devices/" DEVICE_ID
 #endif
 #define PATH_ACTUATORS PATH_DEVICE "/actuators"
 template <typename T>
