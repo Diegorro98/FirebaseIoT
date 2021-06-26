@@ -9,7 +9,7 @@ At this time, it works with Firebase's Real Time Database.
 
 ## Library dependencies
 This libraries were tested with the mentioned version, but fell free to test newer versions if exist and post me the result.
- * [Firebase Arduino Client Library for ESP8266 and ESP32 (v2.0.3)](https://github.com/mobizt/Firebase-ESP-Client)
+ * [Firebase Arduino Client Library for ESP8266 and ESP32 (v2.2.5)](https://github.com/mobizt/Firebase-ESP-Client)
  * [ezTime (v0.8.3)](https://github.com/ropg/ezTime)
 
 ## Should defines

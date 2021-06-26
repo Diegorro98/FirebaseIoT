@@ -31,16 +31,7 @@ void initSensorStateSenders();
 */
 uint8_t act(FirebaseStream data);
 void callbackActuators(FirebaseStream data){
-  //log_i("New value(%s) aviable!", data.rawData().c_str());
-  if(data.dataType().compareTo("int") == 0){
-    log_i("New value(%d) aviable!", data.intData());
-  }else if (data.dataType().compareTo("string") == 0) {
-    log_i("New value(%s) aviable!", data.stringData().c_str());
-  }else if (data.dataType().compareTo("json") == 0){
-    log_i("New value(%s) aviable!", data.jsonString().c_str());
-  }else{
-    log_i("New value aviable!");
-  }
+  log_i("New value(%s) available for actuators!", data.payload().c_str());
   log_d("STREAM PATH: %s", data.streamPath().c_str());
   log_d("DATA PATH: %s", data.dataPath().c_str());
   log_d("DATA TYPE: %s", data.dataType().c_str());
